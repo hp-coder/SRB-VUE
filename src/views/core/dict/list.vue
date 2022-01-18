@@ -46,21 +46,53 @@
         <el-button @click="dialogVisible = false">取消</el-button>
       </div>
     </el-dialog>
+    <el-table :data="list" :load="getChildren" row-key="id" border lazy>
+      <el-table-column label="name" align="left" prop="name">
+        <template slot-scope="scope">
+          <span>{{ scope.row.name }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="code" prop="dictCode">
+        <template slot-scope="{ row }">
+          <span>{{ row.dictCode }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="value" prop="value">
+        <template slot-scope="scope">
+          <span>{{ scope.row.value }}</span>
+        </template>
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 <script>
+import dictApi from '@/api/dict'
 export default {
   data() {
     return {
       dialogVisible: false,
       BASE_API: process.env.VUE_APP_BASE_API,
+      list: [],
     }
   },
+  created() {
+    this.fetchData(1)
+  },
   methods: {
+    getChildren(row, treeNode, resolve) {
+      dictApi.listByParentId(row.id).then((resp) => {
+        resolve(resp.data.list)
+      })
+    },
+    fetchData(id) {
+      dictApi.listByParentId(id).then((resp) => {
+        this.list = resp.data.list
+      })
+    },
     exportData() {
-        //需要显示的调用下载地址
-        console.log("被调用了")
-        window.location.href= this.BASE_API +'/admin/core/dict/exportData'
+      //需要显示的调用下载地址
+      console.log('被调用了')
+      window.location.href = this.BASE_API + '/admin/core/dict/exportData'
     },
     fileUploadSuccess(resp) {
       if (resp.code === 0) {
